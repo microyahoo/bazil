@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"net"
-	"time"
 
 	"bazil.org/bazil/util/edtls"
 	"github.com/agl/ed25519"
@@ -21,7 +20,7 @@ type Authenticator struct {
 	PeerPub *[ed25519.PublicKeySize]byte
 }
 
-var _ credentials.TransportAuthenticator = (*Authenticator)(nil)
+// var _ credentials.TransportAuthenticator = (*Authenticator)(nil)
 
 func (a *Authenticator) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
 	return nil, nil
@@ -39,7 +38,7 @@ var _ credentials.AuthInfo = (*Auth)(nil)
 
 func (*Auth) AuthType() string { return "edtls" }
 
-func (a *Authenticator) ClientHandshake(addr string, rawConn net.Conn, timeout time.Duration) (net.Conn, credentials.AuthInfo, error) {
+func (a *Authenticator) ClientHandshake(ctx context.Context, addr string, rawConn net.Conn) (net.Conn, credentials.AuthInfo, error) {
 	if a.Config == nil {
 		return nil, nil, errMissingTLSConfig
 	}
@@ -94,6 +93,15 @@ func (a *Authenticator) ServerHandshake(conn net.Conn) (net.Conn, credentials.Au
 	return tconn, authInfo, nil
 }
 
+// TODO
+func (a *Authenticator) Clone() credentials.TransportCredentials {
+	return nil
+}
+
+// TODO
+func (a *Authenticator) OverrideServerName(string) error {
+	return nil
+}
 func (a *Authenticator) Info() credentials.ProtocolInfo {
 	return credentials.ProtocolInfo{
 		SecurityProtocol: "TODO",

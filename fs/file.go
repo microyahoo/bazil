@@ -65,9 +65,9 @@ func (f *file) marshalInternal(ctx context.Context) (*wire.Dirent, error) {
 	if err != nil {
 		return nil, err
 	}
-	de.File = &wire.File{
+	de.Type = &wire.Dirent_File{File: &wire.File{
 		Manifest: wirecas.FromBlob(manifest),
-	}
+	}}
 	return de, nil
 }
 

@@ -1,6 +1,8 @@
 package peer
 
 import (
+	"net"
+
 	"bazil.org/bazil/db"
 	"bazil.org/bazil/peer"
 	"bazil.org/bazil/peer/wire"
@@ -9,15 +11,21 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials"
+	// "google.golang.org/grpc/credentials"
+	grpc_peer "google.golang.org/grpc/peer"
 )
 
 func (p *peers) auth(ctx context.Context) (*peer.PublicKey, error) {
-	authInfo, ok := credentials.FromContext(ctx)
+	// https://go.googlesource.com/grpc-review/+/843cf836083053d69b704ec5a058deb437a63a28%5E1..843cf836083053d69b704ec5a058deb437a63a28/
+	// authInfo, ok := credentials.FromContext(ctx)
+	pr, ok := grpc_peer.FromContext(ctx)
 	if !ok {
 		return nil, grpc.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
-	auth, ok := authInfo.(*grpcedtls.Auth)
+	if pr.Addr == net.Addr(nil) {
+		return nil, grpc.Errorf(codes.Unauthenticated, "failed to get peer address")
+	}
+	auth, ok := pr.AuthInfo.(*grpcedtls.Auth)
 	if !ok {
 		return nil, grpc.Errorf(codes.Unauthenticated, "unauthenticated")
 	}
